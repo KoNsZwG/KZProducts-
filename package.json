@@ -1,0 +1,32 @@
+{
+  "name": "kz-products",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxt/content": "^2.13.4",
+    "@nuxtjs/supabase": "^1.4.6",
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "@vueuse/core": "^14.1.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-vue-next": "^0.562.0",
+    "nuxt": "^3.17.0",
+    "reka-ui": "^2.6.1",
+    "stripe": "^20.1.0",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss-animate": "^1.0.7",
+    "vue": "^3.5.25",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.3",
+    "typescript": "^5.9.3"
+  }
+}
