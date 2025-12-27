@@ -43,6 +43,12 @@ const handleLogin = async () => {
 
 <template>
   <div class="grid gap-6">
+    <div class="grid gap-2 text-center">
+      <h1 class="text-2xl font-bold">Welcome back</h1>
+      <p class="text-muted-foreground text-sm">
+        Enter your credentials to access your account
+      </p>
+    </div>
     <form @submit.prevent="handleLogin">
       <div class="grid gap-4">
         <div class="grid gap-2">
@@ -73,10 +79,14 @@ const handleLogin = async () => {
           {{ error }}
         </div>
 
-        <Button :disabled="loading">
+        <button 
+          type="submit" 
+          :disabled="loading"
+          class="inline-flex w-full items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+        >
           <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
           Sign In
-        </Button>
+        </button>
       </div>
     </form>
     

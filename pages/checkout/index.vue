@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 definePageMeta({
-  layout: 'checkout'
+  layout: 'checkout',
+  middleware: 'auth'
 })
 
 const { items, total } = useCart()

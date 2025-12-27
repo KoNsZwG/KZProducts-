@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ShoppingCart, Trash2, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-vue-next'
+import { ShoppingCart, Trash2, Plus, Minus, ShoppingBag, ArrowRight, XCircle } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -10,6 +10,17 @@ import {
   SheetTrigger,
   SheetFooter,
 } from '@/components/ui/sheet'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Separator } from '@/components/ui/separator'
 import { useCartStore } from '~/stores/cart'
 
@@ -164,6 +175,35 @@ const decrementQuantity = (productId: string, currentQty: number) => {
             </NuxtLink>
           </Button>
         </div>
+
+        <!-- Clear Cart with Confirmation -->
+        <AlertDialog>
+          <AlertDialogTrigger as-child>
+            <button 
+              type="button"
+              class="w-full text-center text-sm text-muted-foreground hover:text-destructive transition-colors py-2"
+            >
+              Clear Cart
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent class="bg-background/95 backdrop-blur-xl border-white/10">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Clear your shopping cart?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to clear your cart? This action cannot be undone and all items will be removed.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel class="border-white/10 hover:bg-white/10">Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                @click="cartStore.clearCart()"
+              >
+                Yes, Clear Cart
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </SheetContent>
   </Sheet>

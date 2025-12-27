@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { User, Search, Menu, Sparkles, ChevronDown, Cpu, MonitorSpeaker, MemoryStick, HardDrive } from 'lucide-vue-next'
+import { Search, Menu, Sparkles, ChevronDown, Cpu, MonitorSpeaker, MemoryStick, HardDrive } from 'lucide-vue-next'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import {
@@ -185,38 +185,7 @@ const getIcon = (slug: string) => categoryIcons[slug] || Cpu
           <CartSheet />
 
           <!-- User Menu -->
-          <DropdownMenu v-if="user">
-            <DropdownMenuTrigger as-child>
-              <Button variant="ghost" size="icon" class="hover:bg-white/10">
-                <User class="h-5 w-5" />
-                <span class="sr-only">Toggle user menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" class="bg-background/95 backdrop-blur-xl border-white/10">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator class="bg-white/10" />
-              <DropdownMenuItem @click="router.push('/account')" class="focus:bg-white/10">
-                Dashboard
-              </DropdownMenuItem>
-              <DropdownMenuItem @click="router.push('/account/orders')" class="focus:bg-white/10">
-                Orders
-              </DropdownMenuItem>
-              <DropdownMenuSeparator class="bg-white/10" />
-              <DropdownMenuItem @click="handleLogout" class="focus:bg-white/10 text-destructive">
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <!-- Login Button -->
-          <Button 
-            v-else 
-            size="sm" 
-            class="bg-primary/90 hover:bg-primary shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all" 
-            as-child
-          >
-            <NuxtLink to="/auth/login">Login</NuxtLink>
-          </Button>
+          <UserMenu />
         </nav>
       </div>
     </div>

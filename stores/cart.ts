@@ -16,10 +16,21 @@ const CART_STORAGE_KEY = 'kz-cart'
 export const useCartStore = defineStore('cart', () => {
   // State - skipHydrate prevents SSR/client mismatch
   const items = ref<CartItem[]>([])
+  const isHydrated = ref(false)
+  const isSyncing = ref(false)
+  
+  // Get Supabase client and user (only on client-side)
+  const getSupabaseClient = () => {
+    if (import.meta.server) return null
+    return useSupabaseClient<Database>()
+  }
+  
+  const getSupabaseUser = () => {
+    if (import.meta.server) return null
+    return useSupabaseUser()
+  }
 
   // Initialize from localStorage (client-side only)
-  const isHydrated = ref(false)
-
   const initFromStorage = () => {
     if (import.meta.client && !isHydrated.value) {
       try {
@@ -45,8 +56,72 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
+  // Sync cart with Supabase for authenticated users
+  const syncWithSupabase = async () => {
+    const client = getSupabaseClient()
+    const user = getSupabaseUser()
+    
+    if (!client || !user?.value || isSyncing.value) return
+    
+    isSyncing.value = true
+    try {
+      // Fetch user's cart from database
+      const { data: dbItems, error } = await client
+        .from('cart_items')
+        .select('id, product_id, quantity, products(*)')
+        .eq('user_id', user.value.id)
+      
+      if (error) {
+        console.error('Error fetching cart from DB:', error)
+        return
+      }
+      
+      // Merge local cart with DB cart
+      if (dbItems && dbItems.length > 0) {
+        for (const dbItem of dbItems) {
+          const existingLocal = items.value.find(i => i.productId === dbItem.product_id)
+          if (!existingLocal && dbItem.products) {
+            // Add DB item to local cart
+            items.value.push({
+              productId: dbItem.product_id,
+              product: dbItem.products as Product,
+              quantity: dbItem.quantity
+            })
+          } else if (existingLocal) {
+            // If exists in both, keep higher quantity
+            existingLocal.quantity = Math.max(existingLocal.quantity, dbItem.quantity)
+          }
+        }
+      }
+      
+      // Push all local items to DB
+      for (const item of items.value) {
+        await client
+          .from('cart_items')
+          .upsert({
+            user_id: user.value.id,
+            product_id: item.productId,
+            quantity: item.quantity
+          }, {
+            onConflict: 'user_id,product_id'
+          })
+      }
+    } catch (e) {
+      console.error('Cart sync error:', e)
+    } finally {
+      isSyncing.value = false
+    }
+  }
+
   // Watch for changes and persist
-  watch(items, saveToStorage, { deep: true })
+  watch(items, () => {
+    saveToStorage()
+    // Also sync to Supabase if user is logged in
+    const user = getSupabaseUser()
+    if (user?.value && !isSyncing.value) {
+      syncWithSupabase()
+    }
+  }, { deep: true })
 
   // Actions
   const addToCart = (product: Product, quantity = 1) => {
@@ -64,10 +139,21 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
-  const removeFromCart = (productId: string) => {
+  const removeFromCart = async (productId: string) => {
     const idx = items.value.findIndex(i => i.productId === productId)
     if (idx > -1) {
       items.value.splice(idx, 1)
+      
+      // Also remove from DB if user logged in
+      const client = getSupabaseClient()
+      const user = getSupabaseUser()
+      if (client && user?.value) {
+        await client
+          .from('cart_items')
+          .delete()
+          .eq('user_id', user.value.id)
+          .eq('product_id', productId)
+      }
     }
   }
 
@@ -82,8 +168,18 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
-  const clearCart = () => {
+  const clearCart = async () => {
     items.value = []
+    
+    // Also clear from DB if user logged in
+    const client = getSupabaseClient()
+    const user = getSupabaseUser()
+    if (client && user?.value) {
+      await client
+        .from('cart_items')
+        .delete()
+        .eq('user_id', user.value.id)
+    }
   }
 
   // Getters
@@ -99,8 +195,10 @@ export const useCartStore = defineStore('cart', () => {
     // State (skip hydrate to prevent SSR mismatch)
     items: skipHydrate(items),
     isHydrated: skipHydrate(isHydrated),
+    isSyncing: skipHydrate(isSyncing),
     // Actions
     initFromStorage,
+    syncWithSupabase,
     addToCart,
     removeFromCart,
     updateQuantity,
