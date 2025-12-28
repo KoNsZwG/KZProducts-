@@ -44,28 +44,31 @@ const handleCheckout = async () => {
   error.value = null
 
   try {
-    const { data, error: fetchError } = await useFetch('/api/orders/create', {
+    // Only send product IDs and quantities - prices fetched from DB on server
+    const cartItems = cartStore.items.map(item => ({
+      productId: item.productId,
+      quantity: item.quantity
+    }))
+
+    const { data, error: fetchError } = await useFetch('/api/stripe/create-checkout-session', {
       method: 'POST',
       body: {
-        items: cartStore.items,
+        items: cartItems,
         shipping: form
       }
     })
 
     if (fetchError.value) {
-      throw new Error(fetchError.value.statusMessage || 'Failed to create order')
+      throw new Error(fetchError.value.statusMessage || 'Failed to create checkout session')
     }
 
-    if (data.value?.success) {
-      // Clear local cart
-      cartStore.clearCart()
-      
-      // Redirect to success page with order number
-      router.push(`/checkout/success?order=${data.value.order.orderNumber}`)
+    if (data.value?.url) {
+      // Redirect to Stripe Checkout - cart cleared via webhook after payment
+      window.location.href = data.value.url
     }
   } catch (e: any) {
     error.value = e.message || 'An error occurred during checkout'
-    toast.error(error.value)
+    toast.error(error.value ?? 'An error occurred')
   } finally {
     loading.value = false
   }
@@ -284,7 +287,7 @@ const formatPrice = (price: number) => {
                   <template v-else>
                     <CreditCard class="mr-2 h-4 w-4" />
                   </template>
-                  {{ loading ? 'Processing...' : 'Complete Order' }}
+                  {{ loading ? 'Redirecting to Payment...' : 'Pay Now' }}
                 </button>
 
                 <p class="text-xs text-center text-muted-foreground mt-4">
