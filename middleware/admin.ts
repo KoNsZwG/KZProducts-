@@ -4,36 +4,53 @@ export default defineNuxtRouteMiddleware(async (to, _from) => {
   const user = useSupabaseUser()
   const client = useSupabaseClient<Database>()
 
-  // CRITICAL: On server-side, we need to check if there's no user session
-  // If no user on server OR client, redirect immediately
+  // If no user, redirect to login
   if (!user.value) {
-    // Use abortNavigation on server to prevent SSR of protected content
+    console.log('[Admin Middleware] No user, redirecting to login')
     if (import.meta.server) {
       return navigateTo('/auth/login', { redirectCode: 302 })
     }
     return navigateTo('/auth/login')
   }
 
-  // Fetch user profile to check admin status
-  const { data: profile, error } = await client
-    .from('profiles')
-    .select('is_admin')
-    .eq('id', user.value.id)
-    .maybeSingle()
+  console.log('[Admin Middleware] User found:', user.value.id)
 
-  if (error) {
-    console.error('Error fetching admin status:', error)
-    if (import.meta.server) {
-      return navigateTo('/', { redirectCode: 302 })
+  try {
+    // Fetch user profile to check admin status
+    const { data: profile, error } = await client
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.value.id)
+      .single()
+
+    console.log('[Admin Middleware] Profile result:', { profile, error: error?.message })
+
+    if (error) {
+      console.error('[Admin Middleware] Error fetching profile:', error.message)
+      // If error, redirect to home
+      if (import.meta.server) {
+        return navigateTo('/', { redirectCode: 302 })
+      }
+      return navigateTo('/')
     }
-    return navigateTo('/')
-  }
 
-  // Check if user is admin
-  if (!profile?.is_admin) {
+    // Check if user is admin
+    if (!profile?.is_admin) {
+      console.log('[Admin Middleware] User is NOT admin, redirecting to home')
+      if (import.meta.server) {
+        return navigateTo('/', { redirectCode: 302 })
+      }
+      return navigateTo('/')
+    }
+
+    console.log('[Admin Middleware] User IS admin, allowing access')
+    // User is admin, allow access
+  } catch (err) {
+    console.error('[Admin Middleware] Unexpected error:', err)
     if (import.meta.server) {
       return navigateTo('/', { redirectCode: 302 })
     }
     return navigateTo('/')
   }
 })
+

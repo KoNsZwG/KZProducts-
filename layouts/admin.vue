@@ -57,17 +57,17 @@ const handleLogout = async () => {
         mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       ]"
     >
-      <!-- Logo -->
+      <!-- Logo - Links to Home Page -->
       <div class="flex h-16 items-center justify-between border-b border-white/10 px-4">
-        <NuxtLink to="/admin" class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/20">
+        <NuxtLink to="/" class="flex items-center gap-3 group">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/20 group-hover:bg-violet-500/30 transition-colors">
             <span class="text-xl font-bold text-violet-400">K</span>
           </div>
           <span
             v-if="sidebarOpen"
-            class="text-lg font-semibold transition-opacity duration-200"
+            class="text-lg font-semibold transition-opacity duration-200 group-hover:text-violet-300"
           >
-            KZAdmin
+            KZProducts
           </span>
         </NuxtLink>
         <button

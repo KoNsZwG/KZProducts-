@@ -88,16 +88,32 @@ const generateSlug = () => {
     .replace(/(^-|-$)/g, '')
 }
 
-// Add image URL
-const newImageUrl = ref('')
-const addImage = () => {
-  if (newImageUrl.value && !form.value.images?.includes(newImageUrl.value)) {
-    form.value.images = [...(form.value.images || []), newImageUrl.value]
-    newImageUrl.value = ''
+// Primary image (first in array)
+const primaryImage = computed({
+  get: () => form.value.images?.[0] || null,
+  set: (value: string | null) => {
+    if (value) {
+      form.value.images = [value, ...(form.value.images?.slice(1) || [])]
+    } else {
+      form.value.images = form.value.images?.slice(1) || []
+    }
+  }
+})
+
+// Handle image uploaded
+const handleImageUploaded = (url: string) => {
+  // Primary image is set via v-model, just ensure array exists
+  if (!form.value.images) {
+    form.value.images = []
   }
 }
 
-// Remove image
+// Handle image deleted
+const handleImageDeleted = () => {
+  // Primary image removed via v-model
+}
+
+// Remove image by index
 const removeImage = (index: number) => {
   form.value.images = form.value.images?.filter((_, i) => i !== index) || []
 }
@@ -321,48 +337,41 @@ onMounted(() => {
             <!-- Images -->
             <div>
               <label class="mb-2 block text-sm font-medium text-slate-300">
-                Images
+                Product Image
               </label>
               
-              <!-- Image list -->
-              <div v-if="form.images?.length" class="mb-4 space-y-2">
-                <div
-                  v-for="(img, idx) in form.images"
-                  :key="idx"
-                  class="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 p-2"
-                >
-                  <img
-                    :src="img"
-                    :alt="`Image ${idx + 1}`"
-                    class="h-10 w-10 rounded object-cover"
-                  />
-                  <span class="flex-1 truncate text-sm text-slate-400">{{ img }}</span>
-                  <button
-                    type="button"
-                    class="rounded p-1 text-slate-400 hover:bg-white/5 hover:text-rose-400"
-                    @click="removeImage(idx)"
-                  >
-                    <Trash2 class="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
+              <!-- Primary image uploader -->
+              <AdminImageUploader
+                v-model="primaryImage"
+                bucket="products"
+                :folder="form.slug || 'uploads'"
+                @uploaded="handleImageUploaded"
+                @deleted="handleImageDeleted"
+              />
 
-              <!-- Add image input -->
-              <div class="flex gap-2">
-                <input
-                  v-model="newImageUrl"
-                  type="url"
-                  class="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-slate-500 outline-none transition-colors focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20"
-                  placeholder="Enter image URL"
-                  @keydown.enter.prevent="addImage"
-                />
-                <button
-                  type="button"
-                  class="rounded-xl bg-white/5 px-4 py-3 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
-                  @click="addImage"
-                >
-                  <Upload class="h-5 w-5" />
-                </button>
+              <!-- Additional image URLs (optional) -->
+              <div v-if="form.images && form.images.length > 1" class="mt-4">
+                <p class="mb-2 text-xs text-slate-500">Additional images ({{ form.images.length - 1 }})</p>
+                <div class="flex flex-wrap gap-2">
+                  <div
+                    v-for="(img, idx) in form.images.slice(1)"
+                    :key="idx"
+                    class="relative group"
+                  >
+                    <img
+                      :src="img"
+                      :alt="`Image ${idx + 2}`"
+                      class="h-16 w-16 rounded-lg object-cover border border-white/10"
+                    />
+                    <button
+                      type="button"
+                      class="absolute -top-2 -right-2 rounded-full bg-rose-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      @click="removeImage(idx + 1)"
+                    >
+                      <X class="h-3 w-3 text-white" />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
