@@ -2,6 +2,7 @@
 import { Plus, Search, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import type { Database } from '~/types/database.types'
+import type { ImportPreview } from '~/composables/useCsvProducts'
 
 type Product = Database['public']['Tables']['products']['Row'] & {
   categories?: { name: string } | null
@@ -13,6 +14,9 @@ definePageMeta({
 })
 
 const client = useSupabaseClient<Database>()
+
+// CSV Import/Export
+const { loading: csvLoading, exportProductsToCsv, parseImportFile, importProducts } = useCsvProducts()
 
 // State
 const products = ref<Product[]>([])
@@ -29,6 +33,11 @@ const editingProduct = ref<Product | null>(null)
 // Delete confirmation
 const deleteConfirmOpen = ref(false)
 const productToDelete = ref<Product | null>(null)
+
+// CSV Import modal state
+const importModalOpen = ref(false)
+const importPreview = ref<ImportPreview | null>(null)
+const importLoading = ref(false)
 
 // Computed
 const totalPages = computed(() => Math.ceil(totalCount.value / pageSize))
@@ -123,6 +132,56 @@ watch(currentPage, () => {
   fetchProducts()
 })
 
+// CSV Export handler
+const handleExportCsv = async () => {
+  await exportProductsToCsv()
+}
+
+// CSV Import file selected handler
+const handleImportFile = async (file: File) => {
+  try {
+    importLoading.value = true
+    const preview = await parseImportFile(file)
+    importPreview.value = preview
+    importModalOpen.value = true
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to parse CSV file')
+  } finally {
+    importLoading.value = false
+  }
+}
+
+// CSV Import confirm handler
+const handleImportConfirm = async (confirmedCategories: string[]) => {
+  if (!importPreview.value) return
+  
+  importLoading.value = true
+  try {
+    const result = await importProducts(importPreview.value, confirmedCategories)
+    
+    if (result.errors.length > 0) {
+      result.errors.forEach((err: string) => toast.error(err))
+    }
+    
+    if (result.created > 0 || result.updated > 0) {
+      toast.success(`Import complete: ${result.created} created, ${result.updated} updated`)
+    }
+    
+    importModalOpen.value = false
+    importPreview.value = null
+    fetchProducts()
+  } catch (error: any) {
+    toast.error(error.message || 'Import failed')
+  } finally {
+    importLoading.value = false
+  }
+}
+
+// CSV Import cancel handler
+const handleImportCancel = () => {
+  importPreview.value = null
+}
+
 onMounted(() => {
   fetchProducts()
 })
@@ -136,13 +195,23 @@ onMounted(() => {
         <h1 class="text-2xl font-bold text-white">Products</h1>
         <p class="mt-1 text-slate-400">Manage your product catalog</p>
       </div>
-      <button
-        class="flex items-center gap-2 rounded-xl bg-violet-500 px-4 py-2.5 font-medium text-white shadow-lg shadow-violet-500/25 transition-all hover:bg-violet-600 hover:shadow-violet-500/40"
-        @click="openNewProductDrawer"
-      >
-        <Plus class="h-5 w-5" />
-        Add Product
-      </button>
+      <div class="flex items-center gap-3">
+        <!-- CSV Import/Export -->
+        <AdminCsvImportExportButtons
+          :loading="csvLoading || importLoading"
+          @export="handleExportCsv"
+          @import="handleImportFile"
+        />
+        
+        <!-- Add Product -->
+        <button
+          class="flex items-center gap-2 rounded-xl bg-violet-500 px-4 py-2.5 font-medium text-white shadow-lg shadow-violet-500/25 transition-all hover:bg-violet-600 hover:shadow-violet-500/40"
+          @click="openNewProductDrawer"
+        >
+          <Plus class="h-5 w-5" />
+          Add Product
+        </button>
+      </div>
     </div>
 
     <!-- Search & Filters -->
@@ -375,5 +444,14 @@ onMounted(() => {
         </div>
       </Transition>
     </Teleport>
+
+    <!-- CSV Import Modal -->
+    <AdminCsvImportModal
+      v-model:open="importModalOpen"
+      :preview="importPreview"
+      :loading="importLoading"
+      @confirm="handleImportConfirm"
+      @cancel="handleImportCancel"
+    />
   </div>
 </template>
