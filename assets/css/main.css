@@ -66,3 +66,42 @@
     @apply bg-slate-950 text-foreground;
   }
 }
+
+/* Slide-up fade-in animation for hero CTA buttons - smooth and slow */
+@keyframes slideUpFade {
+  0% {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up-fade {
+  animation: slideUpFade 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s both;
+}
+
+/* Slide-down fade-in with subtle bounce animation for hero title - smooth and slow */
+@keyframes slideDownFadeBounce {
+  0% {
+    opacity: 0;
+    transform: translateY(-60px);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(6px);
+  }
+  85% {
+    transform: translateY(-3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down-bounce {
+  animation: slideDownFadeBounce 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s both;
+}
