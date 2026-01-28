@@ -130,6 +130,19 @@ import {
         </div>
       </div>
 
+      <!-- Newsletter Subscription -->
+      <div class="mt-10 pt-8 border-t border-white/10">
+        <div class="text-center max-w-md mx-auto">
+          <h3 class="text-lg font-semibold text-white mb-2">
+            Subscribe to Our Newsletter
+          </h3>
+          <p class="text-sm text-slate-400 mb-4">
+            Get the latest deals, product updates, and exclusive offers.
+          </p>
+          <NewsletterForm />
+        </div>
+      </div>
+
       <!-- Bottom Bar -->
       <div class="mt-12 pt-8 border-t border-white/10">
         <div

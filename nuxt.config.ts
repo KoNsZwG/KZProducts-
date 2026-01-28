@@ -23,6 +23,12 @@ export default defineNuxtConfig({
     stripeSecretKey: process.env.STRIPE_SECRET_KEY,
     stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
     supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY,
+    // Email services
+    mailtrapHost: process.env.MAILTRAP_HOST,
+    mailtrapPort: process.env.MAILTRAP_PORT,
+    mailtrapUser: process.env.MAILTRAP_USER,
+    mailtrapPass: process.env.MAILTRAP_PASS,
+    resendApiKey: process.env.RESEND_API_KEY,
     public: {
       supabaseUrl: process.env.SUPABASE_URL,
       supabaseKey: process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY,
