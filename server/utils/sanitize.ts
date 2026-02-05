@@ -1,25 +1,20 @@
+import sanitizeHtml from 'sanitize-html'
+
 /**
  * Sanitize text input to prevent XSS attacks
- * - Strips ALL HTML tags using regex (serverless-compatible)
+ * - Strips ALL HTML tags using sanitize-html (serverless-compatible, no jsdom)
  * - Escapes special characters
  * - Trims whitespace
  */
 export function sanitizeText(text: string): string {
   if (!text || typeof text !== 'string') return ''
   
-  // Strip all HTML tags
-  let clean = text.replace(/<[^>]*>/g, '')
-  
-  // Decode HTML entities first to catch encoded attacks
-  clean = clean
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#x27;/g, "'")
-    .replace(/&amp;/g, '&')
-  
-  // Strip tags again after decoding
-  clean = clean.replace(/<[^>]*>/g, '')
+  // Strip all HTML tags - sanitize-html is pure JS, works in serverless
+  const clean = sanitizeHtml(text, {
+    allowedTags: [],
+    allowedAttributes: {},
+    disallowedTagsMode: 'discard'
+  })
   
   // Escape special characters for safe storage/display
   return clean
