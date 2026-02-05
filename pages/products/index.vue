@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Loader2, Filter, Search, Grid3X3, List } from 'lucide-vue-next'
+import { Loader2, Search } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import ProductCard from '@/components/product/ProductCard.vue'
@@ -8,7 +8,6 @@ const route = useRoute()
 const { products, loading, error, fetchProducts } = useProducts()
 
 const searchQuery = ref((route.query.q as string) || '')
-const viewMode = ref<'grid' | 'list'>('grid')
 
 // Fetch products on mount
 onMounted(async () => {
@@ -47,26 +46,6 @@ const filteredProducts = computed(() => {
             class="pl-9 w-[200px]"
           />
         </div>
-        
-        <!-- View Toggle -->
-        <div class="hidden sm:flex border rounded-lg">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            :class="viewMode === 'grid' ? 'bg-muted' : ''"
-            @click="viewMode = 'grid'"
-          >
-            <Grid3X3 class="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            :class="viewMode === 'list' ? 'bg-muted' : ''"
-            @click="viewMode = 'list'"
-          >
-            <List class="h-4 w-4" />
-          </Button>
-        </div>
       </div>
     </div>
 
@@ -93,10 +72,7 @@ const filteredProducts = computed(() => {
     <!-- Products Grid -->
     <div 
       v-else 
-      class="grid gap-6"
-      :class="viewMode === 'grid' 
-        ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-        : 'grid-cols-1'"
+      class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
     >
       <ProductCard 
         v-for="product in filteredProducts" 
