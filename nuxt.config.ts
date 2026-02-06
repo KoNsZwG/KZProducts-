@@ -170,7 +170,6 @@ export default defineNuxtConfig({
         output: {
           manualChunks: {
             'vendor': ['vue', 'pinia'],
-            'supabase': ['@supabase/supabase-js'],
           }
         }
       }
