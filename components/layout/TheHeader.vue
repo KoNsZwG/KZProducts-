@@ -13,13 +13,17 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '~/components/ui/sheet'
 import type { Database } from '~/types/database.types'
 
+type HeaderCategory = Pick<Database['public']['Tables']['categories']['Row'], 'id' | 'name' | 'slug'>
+
 const user = useSupabaseUser()
 const client = useSupabaseClient<Database>()
+const route = useRoute()
 const router = useRouter()
 
 const searchQuery = ref('')
 const isScrolled = ref(false)
-const categories = ref<Database['public']['Tables']['categories']['Row'][]>([])
+const categories = ref<HeaderCategory[]>([])
+const showGlobalSearch = computed(() => route.path !== '/products')
 
 // Category icon mapping
 const categoryIcons: Record<string, any> = {
@@ -167,8 +171,13 @@ const getIcon = (slug: string) => categoryIcons[slug] || Cpu
       </div>
 
       <!-- Search & Actions -->
-      <div class="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-        <div class="w-full flex-1 md:w-auto md:flex-none">
+      <div
+        :class="[
+          'flex flex-1 items-center space-x-2 md:justify-end',
+          showGlobalSearch ? 'justify-between' : 'justify-end'
+        ]"
+      >
+        <div v-if="showGlobalSearch" class="w-full flex-1 md:w-auto md:flex-none">
           <div class="relative group">
             <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
             <Input
