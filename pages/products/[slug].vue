@@ -238,7 +238,7 @@ const selectImage = (index: number) => {
       <div class="grid md:grid-cols-2 gap-8 lg:gap-12">
         <!-- Image Gallery -->
         <div class="space-y-4">
-          <div class="max-h-[400px] aspect-auto rounded-lg overflow-hidden relative flex items-center justify-center">
+          <div class="relative h-[320px] w-full overflow-hidden rounded-lg sm:h-[400px]">
             <NuxtImg 
               :src="imageSrc" 
               :alt="product.name" 
@@ -247,7 +247,7 @@ const selectImage = (index: number) => {
               fetchpriority="high"
               width="800"
               height="800"
-              class="object-contain max-h-[400px] w-auto"
+              class="h-full w-full object-cover object-left"
               @error="handleImageError"
             />
             <!-- Image Error Overlay -->
