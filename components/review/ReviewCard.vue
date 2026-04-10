@@ -96,7 +96,7 @@ const avatarEmoji = computed(() => {
     </div>
     
     <!-- Actions -->
-    <div class="mt-4 flex items-center justify-between">
+    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <!-- Helpful Vote Button -->
       <Button
         v-if="user && !isOwner"
@@ -124,7 +124,7 @@ const avatarEmoji = computed(() => {
       <div v-else />
       
       <!-- Owner Actions -->
-      <div v-if="isOwner" class="flex items-center gap-2">
+      <div v-if="isOwner" class="flex flex-wrap items-center gap-2 sm:justify-end">
         <Button
           variant="ghost"
           size="sm"
