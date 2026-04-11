@@ -4,13 +4,13 @@
   "private": true,
   "packageManager": "pnpm@9.15.2",
   "scripts": {
-    "build": "pnpm exec nuxi build",
-    "dev": "pnpm exec nuxi dev",
-    "generate": "pnpm exec nuxi generate",
-    "preview": "pnpm exec nuxi preview",
-    "prepare": "pnpm exec nuxi prepare",
-    "postinstall": "pnpm exec nuxi prepare",
-    "typecheck": "pnpm exec nuxi typecheck",
+    "build": "nuxi build",
+    "dev": "nuxi dev",
+    "generate": "nuxi generate",
+    "preview": "nuxi preview",
+    "prepare": "nuxi prepare",
+    "postinstall": "nuxi prepare",
+    "typecheck": "nuxi typecheck",
     "clean": "rimraf .nuxt .output node_modules/.cache"
   },
   "dependencies": {
@@ -24,6 +24,7 @@
     "@stripe/stripe-js": "5.5.0",
     "@types/nodemailer": "^7.0.9",
     "@types/sanitize-html": "^2.16.0",
+    "@vercel/speed-insights": "^2.0.0",
     "@vueuse/core": "14.1.0",
     "chart.js": "4.4.7",
     "class-variance-authority": "0.7.1",
